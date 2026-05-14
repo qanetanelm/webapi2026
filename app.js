@@ -41,7 +41,7 @@ connection.query('SELECT * FROM products', (error, results) => {
         {
         console.log(results);
     }
-}
+})
     // app.get('/products', (req, res) => {
     //     res.status(200).json({ msg: 'All Products' });//כאשר נקבל בקשה לנתיב הראשי '/' נחזיר תשובה עם סטטוס 200 ומסר בפורמט JSON
 
