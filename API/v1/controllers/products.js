@@ -1,6 +1,20 @@
 module.exports={
     getAll:( req, res ) => {
-   return  res.status(200).json({msg:'all products'});
+        const sql='SELECT * FROM t_products';
+connection.query=connection.query(sql,(err,results,fields)=>
+    {
+        if(arr==null){
+            return res.status(404).json({msg:'Not Found'});
+        }
+        
+        console.log(results);
+        return  res.status(200).json({msg:'all products'});
+        console.log(err);
+        console.log(fields);
+    }
+    
+);
+   
 },
     getById:( req, res ) => {
         const pid=req.params.id;

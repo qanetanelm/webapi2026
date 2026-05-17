@@ -11,6 +11,8 @@ app.use((req,res,next)=>{
     }  
         return res.status(403).json({msg:'Forbidden'});
 });
+
+
 const morgan = require('morgan');//חיבור השרת לספריית Morgan
 app.use(morgan('dev'));//הגדרת המידלוור של Morgan כדי לרשום את כל הבקשות שמגיעות לשרת בקונסול    n
 app.use(express.json());//הגדרת המידלוור של Express לעיבוד בקשות עם גוף בפורמט JSON
@@ -24,24 +26,24 @@ const routerOrder=require('./api/v1/routes/order');
 app.use('/order',routerOrder);
 
 
-const mysql = require('mysql');
-//חיבור השרת לספריית mysql2
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'webapiadmin',
-    password: '123123',
-    database: 'webapi   '
-});
-connection.connect();
-connection.query('SELECT * FROM products', (error, results) => {
-    if (error) {
-        console.log('Do not found');
-    }
-    else 
-        {
-        console.log(results);
-    }
-})
+// const mysql = require('mysql');
+// //חיבור השרת לספריית mysql2
+// const connection = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'webapiadmin',
+//     password: '123123',
+//     database: 'webapi   '
+// });
+// connection.connect();
+// connection.query('SELECT * FROM products', (error, results) => {
+//     if (error) {
+//         console.log('Do not found');
+//     }
+//     else 
+//         {
+//         console.log(results);
+//     }
+// })
     // app.get('/products', (req, res) => {
     //     res.status(200).json({ msg: 'All Products' });//כאשר נקבל בקשה לנתיב הראשי '/' נחזיר תשובה עם סטטוס 200 ומסר בפורמט JSON
 
