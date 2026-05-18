@@ -19,9 +19,9 @@ module.exports={
 getById: (req, res) => {
     const pid = req.params.id;
 
-    const sql = `SELECT * FROM t_products WHERE pid = ?`;
+    const sql = `SELECT * FROM t_products WHERE pid = ${pid}`;
 
-    mysqldb.query(sql, [pid], (err, results, fields) => {
+    mysqldb.query(sql, (err, results, fields) => {
 
         if (err) {
             console.log(err);
@@ -54,8 +54,24 @@ getById: (req, res) => {
     // }}
      
 
-    deleteById:( req, res ) => {  
-            const pid=req.params.id;
+    deleteById:( req, res ) => { 
+           const pid=req.params.id
+           const sql = `DELETE FROM t_products WHERE pid = ${pid}`;
+
+    mysqldb.query(sql, (err, results, fields) => {
+
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ msg: 'Database error' });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ msg: 'Not Found' });
+        }
+
+        return res.status(200).json(results[0]);
+    }); 
+            ;
            return res.status(200).json({msg:`Deleted product id: ${pid}`});
         },
     add:( req, res ) => { 
