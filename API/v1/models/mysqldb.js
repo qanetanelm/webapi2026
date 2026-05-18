@@ -7,5 +7,5 @@ const connection=mysql.createConnection({
     database:'webapi'
 });
 
-const mysqldb=reuire('../mysqldb');//יבוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
+const mysqldb=require('../mysqldb');//יבוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
 module.exports=connection;//ייצוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
