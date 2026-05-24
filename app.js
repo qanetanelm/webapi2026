@@ -4,24 +4,25 @@ const app = express();//יצירת אובייקט אפליקציה של Express
 const myLog=require('./api/v1/middlewares/myLog');//יבוא המידלוור שיצרנו כדי לרשום את כל הבקשות שמגיעות לשרת בקונסול    
 app.use(myLog);//הגדרת המידלוור שיצרנו כדי לרשום את כל הבקשות שמגיעות לשרת בקונסול  
 //שכבת אבטחה
-app.use((req,res,next)=>{
-    const arrAllowList=['127.0.0.1' ,'::1'];
-    for(let i=0;i<arrAllowList.length;i++){
-     if(req.ip==arrAllowList[i]){next();}
-    }  
-        return res.status(403).json({msg:'Forbidden'});
-});
+// app.use((req,res,next)=>{
+//     const arrAllowList=['127.0.0.1' ,'::1'];
+//     for(let i=0;i<arrAllowList.length;i++){
+//      if(req.ip==arrAllowList[i]){ return next();}
+//     }  
+//         return res.status(403).json({msg:'Forbidden'});
+// });
 
 
 const morgan = require('morgan');//חיבור השרת לספריית Morgan
 app.use(morgan('dev'));//הגדרת המידלוור של Morgan כדי לרשום את כל הבקשות שמגיעות לשרת בקונסול    n
 app.use(express.json());//הגדרת המידלוור של Express לעיבוד בקשות עם גוף בפורמט JSON
 const routerProduct=require('./api/v1/routes/products');
-app.use('/product',routerProduct);
-const routerCategory=require('./api/v1/routes/category');
-app.use('/category',routerCategory);
+app.use('/products',routerProduct);
 const routerUser=require('./api/v1/routes/user');
 app.use('/user',routerUser);
+const routerCategory=require('./api/v1/routes/category');
+app.use('/category',routerCategory);
+
 const routerOrder=require('./api/v1/routes/order');
 app.use('/order',routerOrder);
 

@@ -6,6 +6,12 @@ const connection=mysql.createConnection({
     port:3306,
     database:'webapi'
 });
+connection.connect((err)=>{
+    if(err){
+        console.log(err);
+        return;
+    }
 
-const mysqldb=require('../mysqldb');//יבוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
+    console.log('MySQL connected');
+}); 
 module.exports=connection;//ייצוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
