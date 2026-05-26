@@ -1,10 +1,10 @@
 const mysql=require('mysql2');//חיבור השרת לספריית mysql2
 const connection=mysql.createConnection({
-    host:'localhost',
-    user:'netanel'
-    ,password:'123123',
-    port:3306,
-    database:'webapi'
+    host:process.env.MYSQLSRV,
+    user:process.env.MYSQLUSER,
+    password:process.env.MYSQLPASSWORD,
+    port:process.env.MYSQLPORT,
+    database:process.env.MYSQLDATABASE
 });
 connection.connect((err)=>{
     if(err){

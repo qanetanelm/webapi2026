@@ -1,3 +1,4 @@
+require('dotenv').config();//חיבור השרת לספריית dotenv כדי לטעון את משתני הסביבה מהקובץ .env
 const express = require('express');//חיבור השרת לספריית Express
 const app = express();//יצירת אובייקט אפליקציה של Express
 //ניצור מידלוור משלנו
@@ -22,7 +23,6 @@ const routerUser=require('./api/v1/routes/user');
 app.use('/user',routerUser);
 const routerCategory=require('./api/v1/routes/category');
 app.use('/category',routerCategory);
-
 const routerOrder=require('./api/v1/routes/order');
 app.use('/order',routerOrder);
 

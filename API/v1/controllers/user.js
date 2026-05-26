@@ -1,59 +1,42 @@
 const mySqlDB=require('../models/mysqldb');//יבוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
+const bcrypt=require('bcrypt');
 module.exports={
-
-    getAll:( req, res ) => {
+     getAll:( req, res ) => {
 
         const sql='SELECT * FROM t_user';
-
         mySqlDB.query(sql,(err,results,fields)=>
         {
-
-            if(err){
+            if(err==null)
+            {
+                console.log(results);
+                return res.status(200).json(results);
+            }
+            else
+            {
                 console.log(err);
-                console.log(fields);
-                return res.status(500).json({msg:'Database error'});
+                return res.status(500).json({'error':err.message});
             }
-
-            if(results.length==0){
-                return res.status(404).json({msg:'Not Found'});
-            }
-
-            console.log(results);
-
-            return res.status(200).json(results);
-
         });
-
     },
 
     getById:( req, res ) => {
-
-        const pid=req.params.id;
-
-        const sql=`SELECT * FROM t_user WHERE pid=${pid}`;
-
+        const uid=req.params.id;
+        const sql=`SELECT * FROM t_user WHERE uid=${uid}`;
         mySqlDB.query(sql,(err,results,fields)=>{
 
-            if(err){
+            if(err==null){
+                console.log(results);
+                return res.status(200).json(results);
+            }
+            else{
                 console.log(err);
-                console.log(fields);
-                return res.status(500).json({msg:'Database error'});
+                return res.status(500).json({'error':err.message});
             }
-
-            if(results.length==0){
-                return res.status(404).json({msg:'Not Found'});
-            }
-
-            console.log(results);
-
-            return res.status(200).json(results[0]);
-
         });
-
     },
     delete:(req,res)=>{
-          const pid=req.params.id; // קבלת קוד המוצר שנשלח
-          const sql=`delete from t_user where pid=${pid}`;
+          const uid=req.params.id; // קבלת קוד המוצר שנשלח
+          const sql=`delete from t_user where uid=${uid}`;
           mySqlDB.query(sql,(err,results,feilds)=>{
             if(err==null)
             {
@@ -66,47 +49,93 @@ module.exports={
              return res.status(500).json({'error':err.message});
             }
         
-});
-    }
-    ,
-    add:( req, res ) => {
-
-        return res.status(200).json({
-            msg:'Created new product'
-        });
-
+    });
     },
-    update:( req, res ) => {
 
-    const pid=req.params.id;
+   add:(req,res)=>{
+    
+    let data=req.body;
+    let arr=Object.keys(data);
+    let fields='';
+    let values='';
 
-    const sql=`UPDATE t_user 
-    SET name='${req.body.name}',
-    price='${req.body.price}'
-    WHERE pid='${pid}'`;
-
-    mySqlDB.query(sql,(err,results,fields)=>
-    {
-
-        if(err){
-            console.log(err);
-            console.log(fields);
-            return res.status(500).json({msg:'Database error'});
+   let sqlName=`SELECT * FROM t_user WHERE email = '${data.email}'`;
+    mySqlDB.query(sqlName,(err,results,fld)=>{
+         if(err!=null)
+            {
+             console.log(results);
+             return res.status(500).json({'error':err.message});
+            }
+            else if(results.length>0)
+            {
+             
+             return res.status(201).json({msg:'email already exists '});
+            }
+     for(let i=0;i<arr.length;i++)
+      {
+        if(arr[i]=='pass')
+        {
+            let pass=data[arr[i]];
+            let hashPass=bcrypt.hashSync(pass,10);
+            fields+=`${arr[i]},`;// pass
+            values+=`'${hashPass}',`;
         }
+        else
+        {
 
-        if(results.affectedRows==0){
-            return res.status(404).json({msg:'Not Found'});
+            fields+=`${arr[i]},`;
+            values+=`'${data[arr[i]]}',`;
         }
+    }   
+    fields=fields.substring(0,fields.length-1);
+    values=values.substring(0,values.length-1);
+    let sql=`INSERT INTO t_user (${fields}) VALUES (${values})`;
 
-        return res.status(200).json({
-            msg:`Updated product id: ${pid}`
-        });
-
+    mySqlDB.query(sql,(err,results,fld)=>{
+         if(err==null)
+          {
+             console.log(results);
+             return res.status(201).json(results);
+          }
+         else
+         {
+           console.log(err);
+           return res.status(500).json({'error':err.message});
+         }
     });
 
-}
-
     
+    });
+    },
+
+   update:( req, res ) => {
+    const uid=req.params.id;
+    let sql='UPDATE t_user SET ';
+    let data=req.body;
+    let arr=Object.keys(data);
+    for(let i=0;i<arr.length;i++)
+
+
+    {
+        sql+=`${arr[i]}='${data[arr[i]]}',`;
+    }
+    sql=sql.substring(0,sql.length-1);
+    sql+=` WHERE uid='${uid}'`;
+    console.log(sql);
+    mySqlDB.query(sql,(err,results,fields)=>
+    {
+        if(err==null)
+        {
+            console.log(results);
+            return res.status(200).json({ msg: `Updated user id: ${uid}` });
+        }
+        else
+        {
+            console.log(err);
+            return res.status(500).json({'error':err.message});
+        }
+        });
+}
 
 };
 //ייצוא המודול 
