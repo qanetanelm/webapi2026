@@ -7,11 +7,16 @@ const routerUser=require('./api/v1/routes/user');
 const routerCategory=require('./api/v1/routes/category');
 const routerOrder=require('./api/v1/routes/order');
 const auth=require('./api/v1/middlewares/auth');
-
-
+const mongoose=require('mongoose');//חיבור לספריית מוגוס    
+const connStr = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_SRV}/EcommDB`;//הגדרת מחרוזת התחברות
+console.log(connStr);
+mongoose.connect(connStr).then((conn)=>
+{
+console.log('MongoDB connected');
+})
 app.use(morgan('dev'));//הגדרת המידלוור של Morgan כדי לרשום את כל הבקשות שמגיעות לשרת בקונסול    n
 app.use(express.json());//הגדרת המידלוור של Express לעיבוד בקשות עם גוף בפורמט JSO
-app.use('/products',auth,routerProduct);
+app.use('/products',routerProduct);
 app.use('/user',routerUser);
 app.use('/category',routerCategory);
 app.use('/order',routerOrder);

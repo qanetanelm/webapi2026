@@ -1,177 +1,90 @@
-const mySqlDB=require('../models/mysqldb');//יבוא החיבור למסד הנתונים כדי שנוכל להשתמש בו בקבצים אחרים באפליקציה שלנו   
-const bcrypt=require('bcrypt');
-const jwt=require('jsonwebtoken');
+const userModel=require('../models/user');//יבוא המודל של משתמש (Mongo) כדי לבצע פעולות על האוסף
+const bcrypt=require('bcrypt');//ספרייה להצפנת סיסמאות
+const jwt=require('jsonwebtoken');//ספרייה ליצירת ואימות טוקנים (JWT) להתחברות
 module.exports={
-     getAll:( req, res ) => {
-
-        const sql='SELECT * FROM t_user';
-        mySqlDB.query(sql,(err,results,fields)=>
-        {
-            if(err==null)
-            {
-                console.log(results);
-                return res.status(200).json(results);
-            }
-            else
-            {
-                console.log(err);
-                return res.status(500).json({'error':err.message});
-            }
-        });
-    },
-
-    getById:( req, res ) => {
-        const uid=req.params.id;
-        const sql=`SELECT * FROM t_user WHERE uid=${uid}`;
-        mySqlDB.query(sql,(err,results,fields)=>{
-
-            if(err==null){
-                console.log(results);
-                return res.status(200).json(results);
-            }
-            else{
-                console.log(err);
-                return res.status(500).json({'error':err.message});
-            }
-        });
-    },
-    delete:(req,res)=>{
-          const uid=req.params.id; // קבלת קוד המוצר שנשלח
-          const sql=`delete from t_user where uid=${uid}`;
-          mySqlDB.query(sql,(err,results,feilds)=>{
-            if(err==null)
-            {
-             console.log(results);
-             return res.status(200).json(results);
-            }
-            else
-            {
-             console.log(err);
-             return res.status(500).json({'error':err.message});
-            }
-        
-    });
-    },
-
-   add:(req,res)=>{
-    
-    let data=req.body;
-    let arr=Object.keys(data);
-    let fields='';
-    let values='';
-
-   let sqlName=`SELECT * FROM t_user WHERE email = '${data.email}'`;
-    mySqlDB.query(sqlName,(err,results,fld)=>{
-         if(err!=null)
-            {
-             console.log(results);
-             return res.status(500).json({'error':err.message});
-            }
-            else if(results.length>0)
-            {
-             
-             return res.status(201).json({msg:'email already exists '});
-            }
-     for(let i=0;i<arr.length;i++)
-      {
-        if(arr[i]=='pass')
-        {
-            let pass=data[arr[i]];
-            let hashPass=bcrypt.hashSync(pass,10);
-            fields+=`${arr[i]},`;// pass
-            values+=`'${hashPass}',`;
+    getAll:async( req, res ) => {//החזרת כל המשתמשים
+        try{
+            const data=await userModel.find();//שליפת כל המסמכים מהאוסף
+            return res.status(200).json(data);
         }
-        else
-        {
-
-            fields+=`${arr[i]},`;
-            values+=`'${data[arr[i]]}',`;
+        catch(err){
+            return res.status(500).json(err);
         }
-    }   
-    fields=fields.substring(0,fields.length-1);
-    values=values.substring(0,values.length-1);
-    let sql=`INSERT INTO t_user (${fields}) VALUES (${values})`;
+    },
 
-    mySqlDB.query(sql,(err,results,fld)=>{
-         if(err==null)
-          {
-             console.log(results);
-             return res.status(201).json(results);
+    getById:async( req, res ) => {//החזרת משתמש לפי uid
+        const uid=req.params.id;//קבלת המזהה מפרמטרי הנתיב
+        try{
+            const data=await userModel.find({uid:uid});
+            return res.status(200).json(data);
+        }
+        catch(err){
+            return res.status(500).json(err);
+        }
+    },
+    delete:async(req,res)=>{//מחיקת משתמש לפי uid
+          const uid=req.params.id; // קבלת קוד המשתמש שנשלח
+          try{
+            const data=await userModel.deleteOne({uid:uid});
+            return res.status(200).json(data);
           }
-         else
-         {
-           console.log(err);
-           return res.status(500).json({'error':err.message});
-         }
-    });
-
-    
-    });
+          catch(err){
+            return res.status(500).json(err);
+          }
     },
 
-   update:( req, res ) => {
-    const uid=req.params.id;
-    let sql='UPDATE t_user SET ';
-    let data=req.body;
-    let arr=Object.keys(data);
-    for(let i=0;i<arr.length;i++)
-
-
-    {
-        sql+=`${arr[i]}='${data[arr[i]]}',`;
+   add:async(req,res)=>{//הוספת משתמש חדש
+    const data=req.body;//נתוני המשתמש שהתקבלו בבקשה
+    try{
+        const arrUsers=await userModel.find({email:data.email});//בדיקה האם כבר קיים משתמש עם אותו מייל
+        if(arrUsers.length>0)
+        {
+            return res.status(200).json({msg:'email already exists '});
+        }
+        data.pass=bcrypt.hashSync(data.pass,10);//הצפנת הסיסמה לפני השמירה
+        const newUser=new userModel(data);//יצירת מסמך חדש לפי המודל
+        const savedUser=await newUser.save();//שמירה בפועל ב-Mongo
+        return res.status(201).json(savedUser);
     }
-    sql=sql.substring(0,sql.length-1);
-    sql+=` WHERE uid='${uid}'`;
-    console.log(sql);
-    mySqlDB.query(sql,(err,results,fields)=>
-    {
-        if(err==null)
-        {
-            console.log(results);
-            return res.status(200).json({ msg: `Updated user id: ${uid}` });
-        }
-        else
-        {
-            console.log(err);
-            return res.status(500).json({'error':err.message});
-        }
-        });
-},
-   login:(req,res)=>{
-    
-   let data=req.body;
-   let sqlLogin=`SELECT * FROM t_user WHERE email = '${data.email}'`;
-    mySqlDB.query(sqlLogin,(err,results)=>{
-            if(err!=null)
-            {
-             console.log(err);
-             return res.status(500).json({status:false,error:err.message,data:[]});
-            }
-            else if(results.length==0)
-            {
-             
-             return res.status(200).json({status:false,error:null,data:[]});
-            }
-           let user=results[0];
-           bcrypt.compare(data.pass, user.pass,(err,same)=>{
-            if(err != null)
-            {
-                console.log(err);
-                return res.status(500).json({status:false,error:err.message,data:[]});
-            }
-            if(same==true)
-            {
-                const token=jwt.sign({uid:user.uid,email:user.email},process.env.PRIVET_KEY,{expiresIn:'1h'});
-                return res.status(200).json({status:true,error:null,data:results,token:token});
-            }
-            else
-            {
-                return res.status(200).json({status:false,error:null,data:[]});
-            }
+    catch(err){
+        return res.status(500).json(err);
+    }
+    },
 
-        
-        })
-    });
+   update:async( req, res ) => {//עדכון משתמש קיים לפי uid
+    const uid=req.params.id;
+    const data=req.body;
+    if(data.pass!=undefined)
+    {
+      data.pass=bcrypt.hashSync(data.pass,10);//אם נשלחה סיסמה חדשה - מצפינים אותה גם כן
+    }
+    try{
+        const updatedUser=await userModel.updateOne({uid:uid},data);
+        return res.status(200).json(updatedUser);
+    }
+    catch(err){
+        return res.status(500).json(err);
+    }
+},
+
+
+   login:async(req,res)=>{//התחברות משתמש לפי מייל וסיסמה
+
+   let data=req.body;
+   let users=await userModel.find({email:data.email});//חיפוש משתמש לפי המייל שנשלח
+   if(users.length==0)
+   {
+    return res.status(200).json({msg:'User/password not found'});
+   }
+   let user=users[0];
+    let status=await bcrypt.compare(data.pass,user.pass);//השוואת הסיסמה שנשלחה לסיסמה המוצפנת השמורה
+    if(status==false)
+    {
+        return res.status(200).json({msg:'User/password not found'});
+    }
+    const token=jwt.sign({uid:user.uid,email:user.email},process.env.PRIVET_KEY,{expiresIn:'1h'});//יצירת טוקן התחברות בתוקף לשעה
+    return res.status(200).json({msg:'login success',token:token});
+
 },
 
 
