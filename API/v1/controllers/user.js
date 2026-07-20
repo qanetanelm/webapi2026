@@ -86,10 +86,10 @@ module.exports={
     return res.status(200).json({msg:'login success',token:token});
 
 },
-
-
+loginPage:async(req,res)=>{//הצגת עמוד התחברות
+    res.render('login',{layout:'main'});//רינדור עמוד התחברות עם ה-layout הראשי (main.handlebars)
+}
 };
-
 
 //ייצוא המודול 
 

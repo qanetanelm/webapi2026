@@ -2,8 +2,10 @@ const productModel = require('../models/product');//יבוא המודל של מ�
 module.exports = {
     getAll: async (req, res) => {//החזרת כל המוצרים
         try {
-            const data = await productModel.find();//שליפת כל המסמכים מהאוסף
-            return res.status(200).json(data);
+            const data = await productModel.find().lean();//שליפת כל המוצרים מהאוסף
+             console.log("מספר מוצרים:", data.length);
+console.log(data);
+            return res.render("products", { layout: "main", data });
         } catch (err) {
             return res.status(500).json(err);
         }
@@ -12,8 +14,14 @@ module.exports = {
     getById: async (req, res) => {//החזרת מוצר לפי pid
         const pid = req.params.id;//קבלת המזהה מפרמטרי הנתיב
         try {
-            const data = await productModel.find({ pid: pid });
-            return res.status(200).json(data);
+            const data = await productModel.find({ pid }).lean();
+            let prod={};
+            if(data.length>0)
+            {
+                prod=data[0];
+                return res.status(200).json(data);
+            }
+            
         }
          catch (err)
      {
@@ -24,7 +32,7 @@ module.exports = {
     delete:async (req, res) => {//מחיקת מוצר לפי pid
         const pid = req.params.id; // קבלת קוד המוצר שנשלח
         try {
-            const data = await productModel.deleteOne({ pid: pid });
+            const data = await productModel.deleteOne({ PID: pid });
             return res.status(200).json(data);
         } catch (err) {
             return res.status(500).json(err);
@@ -61,7 +69,7 @@ module.exports = {
         const pid = req.params.id;//קבלת קוד המוצר מפרמטרי הנתיב
         const data = req.body;//נתוני העדכון שהתקבלו בבקשה
         try {
-            const updatedProduct = await productModel.updateOne({ pid: pid }, data);//עדכון המסמך במונגו
+            const updatedProduct = await productModel.updateOne({ PID: pid }, data);//עדכון המסמך במונגו
             return res.status(200).json(updatedProduct);
         } catch (err) {
             return res.status(500).json(err);
